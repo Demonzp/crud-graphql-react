@@ -30,6 +30,21 @@ const addProductQuery = ({ name, price }) => {
   }
 };
 
+const updateProductQuery = ({ _id, name, price }) => {
+  return {
+    query: `
+    mutation {
+      updateProduct(_id:"${_id}", name:"${name}", price:${price}) {
+        _id
+        price
+        name
+        createdAt
+        updatedAt
+      }
+    }`
+  }
+};
+
 const deleteProductQuery = ({ _id }) => {
   return {
     query: `
@@ -84,6 +99,35 @@ const App = () => {
     toggleEditProductModal();
   };
 
+  const updateProductHandler = async () => {
+    try {
+      const resData = await axios({
+        method: 'post',
+        url: 'http://localhost:5000/graphql',
+        headers: { 'Content-Type': 'application/json' },
+        data: JSON.stringify(updateProductQuery({
+          _id: editProductId,
+          name: editProductName,
+          price: editProductPrice
+        }))
+      });
+
+      const updateProduct = resData.data.data.updateProduct;
+
+      const index = products.findIndex((el) => el._id === editProductId);
+      const updProducts = [
+        ...products.slice(0, index),
+        updateProduct,
+        ...products.slice(index + 1)
+      ];
+
+      setProducts(updProducts);
+      toggleEditProductModal();
+    } catch (err) {
+      console.error(err);
+    };
+  };
+
   const clearInput = () => {
     setCreateProductName('');
     setCreateProductPrice('');
@@ -123,7 +167,7 @@ const App = () => {
         }))
       });
 
-      if(!resData.data.data.deleteProduct.result){
+      if (!resData.data.data.deleteProduct.result) {
         throw new Error('delete is fail');
       }
 
@@ -184,7 +228,7 @@ const App = () => {
           </Form>
         </ModalBody>
         <ModalFooter>
-          <Button color='primary' onClick={() => { }}>UPDATE</Button>{' '}
+          <Button color='primary' onClick={updateProductHandler}>UPDATE</Button>{' '}
           <Button color='secondary' onClick={toggleEditProductModal}>CANCEL</Button>
         </ModalFooter>
       </Modal>
@@ -215,7 +259,7 @@ const App = () => {
                     <Button onClick={() => editProductHandler(product._id)}>
                       Edit
                     </Button>
-                    <Button onClick={()=> deleteProductHandler(product._id)}>
+                    <Button onClick={() => deleteProductHandler(product._id)}>
                       DELETE
                     </Button>
                   </Col>
