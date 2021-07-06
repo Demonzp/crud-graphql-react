@@ -28,7 +28,18 @@ const addProductQuery = ({ name, price }) => {
       }
     }`
   }
-}
+};
+
+const deleteProductQuery = ({ _id }) => {
+  return {
+    query: `
+    mutation {
+      deleteProduct(_id: "${_id}") {
+        result
+      }
+    }`
+  }
+};
 
 const App = () => {
   const [products, setProducts] = useState([]);
@@ -96,6 +107,27 @@ const App = () => {
       setProducts(updProducts);
       toggleCreateProductModal();
       clearInput();
+    } catch (err) {
+      console.error(err);
+    };
+  };
+
+  const deleteProductHandler = async (_id) => {
+    try {
+      const resData = await axios({
+        method: 'post',
+        url: 'http://localhost:5000/graphql',
+        headers: { 'Content-Type': 'application/json' },
+        data: JSON.stringify(deleteProductQuery({
+          _id
+        }))
+      });
+
+      if(!resData.data.data.deleteProduct.result){
+        throw new Error('delete is fail');
+      }
+
+      getProducts();
     } catch (err) {
       console.error(err);
     };
@@ -183,7 +215,7 @@ const App = () => {
                     <Button onClick={() => editProductHandler(product._id)}>
                       Edit
                     </Button>
-                    <Button>
+                    <Button onClick={()=> deleteProductHandler(product._id)}>
                       DELETE
                     </Button>
                   </Col>
