@@ -15,7 +15,7 @@ const getProductsQuery = {
     }`
 };
 
-const addProductsQuery = ({ name, price }) => {
+const addProductQuery = ({ name, price }) => {
   return {
     query: `
     mutation {
@@ -84,7 +84,7 @@ const App = () => {
         method: 'post',
         url: 'http://localhost:5000/graphql',
         headers: { 'Content-Type': 'application/json' },
-        data: JSON.stringify(addProductsQuery({
+        data: JSON.stringify(addProductQuery({
           name: createProductName,
           price: createProductPrice
         }))
